@@ -8,6 +8,9 @@ function App() {
   ]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentTask, setCurrentTask] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const toggleTaskCompletion = (id) => {
     setTasks(
@@ -28,6 +31,26 @@ function App() {
     ]);
   };
 
+  const editTask = (taskDescription) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === currentTask.id ? { ...task, text: taskDescription } : task
+      )
+    );
+    setCurrentTask(null);
+    setIsEditing(false);
+  };
+
+  const handleEditClick = (task) => {
+    setCurrentTask(task);
+    setIsEditing(true);
+    setIsModalOpen(true);
+  };
+
+  const filteredTasks = tasks.filter((task) =>
+    task.text.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="container">
       <div className="task-container">
@@ -37,31 +60,38 @@ function App() {
         <div className="search-box">
           <input
             type="text"
-            placeholder="Procurar tarefa                                                                    🔍"
+            placeholder="Procurar tarefa"
             className="search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <div className="task-list">
-          {tasks.map((task) => (
+          {filteredTasks.map((task) => (
             <div
               key={task.id}
               className={`task-item ${task.completed ? "completed" : ""}`}
             >
-              <button
-                className="task-button"
-                onClick={() => toggleTaskCompletion(task.id)}
-              >
-                {task.completed ? "✓" : "◻️"}
-              </button>
-              <span className="task-iten-name">{task.text}</span>
+              <span>{task.text}</span>
               <div className="button-group">
+                <button
+                  className="task-button"
+                  onClick={() => toggleTaskCompletion(task.id)}
+                >
+                  {task.completed ? "✓" : "◻️"}
+                </button>
                 <button
                   className="task-button"
                   onClick={() => deleteTask(task.id)}
                 >
                   ❌
                 </button>
-                <button className="task-button">✏️</button>
+                <button
+                  className="task-button"
+                  onClick={() => handleEditClick(task)}
+                >
+                  ✏️
+                </button>
               </div>
             </div>
           ))}
@@ -75,8 +105,12 @@ function App() {
       </div>
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={addTask}
+        onClose={() => {
+          setIsModalOpen(false);
+          setIsEditing(false);
+        }}
+        onSave={isEditing ? editTask : addTask}
+        initialDescription={isEditing ? currentTask.text : ""}
       />
     </div>
   );

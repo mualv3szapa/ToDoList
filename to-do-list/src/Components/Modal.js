@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Modal.css";
 
-function Modal({ isOpen, onClose, onSave }) {
-  const [taskDescription, setTaskDescription] = useState("");
+function Modal({ isOpen, onClose, onSave, initialDescription }) {
+  const [taskDescription, setTaskDescription] = useState(initialDescription);
+
+  useEffect(() => {
+    setTaskDescription(initialDescription);
+  }, [initialDescription]);
 
   const handleSave = () => {
     onSave(taskDescription);
@@ -15,13 +19,15 @@ function Modal({ isOpen, onClose, onSave }) {
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h2>Descreva sua tarefa</h2>
+        <h2>{initialDescription ? "Editar tarefa" : "Descreva sua tarefa"}</h2>
         <textarea
           value={taskDescription}
           onChange={(e) => setTaskDescription(e.target.value)}
           placeholder="Exemplo de descrição"
         />
-        <button onClick={handleSave}>Confirmar tarefa</button>
+        <button onClick={handleSave}>
+          {initialDescription ? "Salvar edição" : "Confirmar tarefa"}
+        </button>
       </div>
     </div>
   );
